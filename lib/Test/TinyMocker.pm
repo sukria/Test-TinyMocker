@@ -1,11 +1,38 @@
 package Test::TinyMocker;
 
-use warnings;
 use strict;
+use warnings;
+
+use vars qw(@EXPORT);
+use base 'Exporter';
+
+@EXPORT = qw(mock should method);
+
+sub method($) {@_}
+sub should(&) {@_}
+
+sub mock {
+    {
+        no strict 'refs';
+        no warnings 'redefine', 'prototype';
+        if (@_ == 3) {
+            my ($class, $method, $sub) = @_;
+
+            *{"${class}::${method}"} = $sub;
+        }
+        else {
+            my ($method, $sub) = @_;
+            *{$method} = $sub;
+        }
+    }
+}
+
+1;
+__END__
 
 =head1 NAME
 
-Test::TinyMocker - The great new Test::TinyMocker!
+Test::TinyMocker - a very simple tool to mock external modules
 
 =head1 VERSION
 
@@ -18,35 +45,41 @@ our $VERSION = '0.01';
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
-
-Perhaps a little code snippet.
-
+    use Test::More;
     use Test::TinyMocker;
 
-    my $foo = Test::TinyMocker->new();
-    ...
+    mock 'Some::Module::You::Want::To::Mock'
+        => method 'some_method'
+        => should {
+            return $mocked_value;
+        };
+
+    # Some::Module::You::Want::To::Mock::some_method() will now always return
+    # $mocked_value;
 
 =head1 EXPORT
 
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
+=head2 mock($module, $method, $sub)
 
-=head1 SUBROUTINES/METHODS
+This function allows you to overwrite the given method with an arbitrary code
+block. This lets you simulate soem kind of behaviour for your tests.
 
-=head2 function1
+Syntactic sugar is provided (C<method> and C<should>) in order to let you write
+sweet mock statements:
 
-=cut
+    # This:
+    mock('Foo::Bar', 'a_method', sub { return 42;});
 
-sub function1 {
-}
+    # is the same as:
+    mock 'Foo::Bar' => method 'a_method' => should { return 42 };
 
-=head2 function2
+=head2 method
 
-=cut
+Syntactic sugar for mock()
 
-sub function2 {
-}
+=head2 should
+
+Syntactic sugar for mock()
 
 =head1 AUTHOR
 
@@ -57,8 +90,6 @@ Alexis Sukrieh, C<< <sukria at sukria.net> >>
 Please report any bugs or feature requests to C<bug-test-tinymocker at rt.cpan.org>, or through
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Test-TinyMocker>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
-
-
 
 
 =head1 SUPPORT
@@ -93,6 +124,13 @@ L<http://search.cpan.org/dist/Test-TinyMocker/>
 
 =head1 ACKNOWLEDGEMENTS
 
+This module was inspired by Gugod's blog, after the article published about
+mocking in Ruby and Perl: L<http://gugod.org/2009/05/mocking.html>
+
+This module was first part of the test tools provided by Dancer in its own t
+directory (previously named C<t::lib::EasyMocker>). A couple of developers asked
+me if I could released this module as a real Test:: distribution on CPAN, so
+here it is.
 
 =head1 LICENSE AND COPYRIGHT
 
@@ -104,7 +142,4 @@ by the Free Software Foundation; or the Artistic License.
 
 See http://dev.perl.org/licenses/ for more information.
 
-
 =cut
-
-1; # End of Test::TinyMocker
