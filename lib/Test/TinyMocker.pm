@@ -5,6 +5,7 @@ use warnings;
 
 use vars qw(@EXPORT);
 use base 'Exporter';
+our $VERSION = '0.01';
 
 @EXPORT = qw(mock should method);
 
@@ -38,9 +39,6 @@ Test::TinyMocker - a very simple tool to mock external modules
 
 Version 0.01
 
-=cut
-
-our $VERSION = '0.01';
 
 
 =head1 SYNOPSIS
