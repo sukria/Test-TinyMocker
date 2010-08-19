@@ -48,14 +48,20 @@ our $VERSION = '0.01';
     use Test::More;
     use Test::TinyMocker;
 
-    mock 'Some::Module::You::Want::To::Mock'
+    mock 'Some::Module'
         => method 'some_method'
         => should {
             return $mocked_value;
         };
 
-    # Some::Module::You::Want::To::Mock::some_method() will now always return
-    # $mocked_value;
+    # or 
+
+    mock 'Some::Module::some_method'
+        => should {
+            return $mocked_value;
+        };
+
+    # Some::Module::some_method() will now always return $mocked_value;
 
 =head1 EXPORT
 
@@ -63,6 +69,10 @@ our $VERSION = '0.01';
 
 This function allows you to overwrite the given method with an arbitrary code
 block. This lets you simulate soem kind of behaviour for your tests.
+
+Alternatively, this method can be passed only two arguments, the first one will
+be the full path of the method (pcakge name + method name) and the second one
+the coderef.
 
 Syntactic sugar is provided (C<method> and C<should>) in order to let you write
 sweet mock statements:
@@ -72,6 +82,12 @@ sweet mock statements:
 
     # is the same as:
     mock 'Foo::Bar' => method 'a_method' => should { return 42 };
+
+    # or:
+    mock 'Foo::Bar::a_method' => should { return 42 };
+
+    # or also:
+    mock('Foo::Bar::a_method', sub { return 42;});
 
 =head2 method
 
