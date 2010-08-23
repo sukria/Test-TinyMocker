@@ -3,11 +3,15 @@ package Test::TinyMocker;
 use strict;
 use warnings;
 
+use Carp qw{ croak };
+
 use vars qw(@EXPORT);
 use base 'Exporter';
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
-@EXPORT = qw(mock should method);
+my $rh_is_mocked = {};
+
+@EXPORT = qw(mock unmock should method);
 
 sub method($) {@_}
 sub should(&) {@_}
@@ -18,14 +22,42 @@ sub mock {
         no warnings 'redefine', 'prototype';
         if (@_ == 3) {
             my ($class, $method, $sub) = @_;
+            my $symbol = "${class}::${method}";
+            _save_sub($symbol);
 
-            *{"${class}::${method}"} = $sub;
+            *{$symbol} = $sub;
         }
         else {
             my ($method, $sub) = @_;
+            _save_sub($method);
+
             *{$method} = $sub;
         }
     }
+}
+
+sub unmock {
+    my $symbole = @_ == 2 ? qq{$_[0]::$_[1]} : shift @_;
+
+    croak "unkown method $symbole"
+      unless $rh_is_mocked->{$symbole};
+
+    {
+        no strict 'refs';
+        no warnings 'redefine', 'prototype';
+        *{$symbole} = delete $rh_is_mocked->{$symbole};
+    }
+}
+
+sub _save_sub {
+    my ($name) = @_;
+
+    {
+        no strict 'refs';
+        $rh_is_mocked->{$name} ||= *{$name}{CODE};
+    }
+
+    return $name;
 }
 
 1;
@@ -61,6 +93,15 @@ Version 0.01
 
     # Some::Module::some_method() will now always return $mocked_value;
 
+	# To restore orignal method
+	
+	unmock 'Some::Module::some_method';
+
+	# or
+	
+	unmock 'Some::Module' => method 'some_method';
+	
+
 =head1 EXPORT
 
 =head2 mock($module, $method, $sub)
@@ -86,6 +127,25 @@ sweet mock statements:
 
     # or also:
     mock('Foo::Bar::a_method', sub { return 42;});
+
+=head2 unmock($module, $method)
+
+TODO
+
+Syntactic sugar is provided (C<method>) in order to let you write sweet unmock
+statements:
+
+    # This:
+    unmock('Foo::Bar', 'a_method');
+
+    # is the same as:
+    unmock 'Foo::Bar' => method 'a_method';
+
+    # or:
+    mock 'Foo::Bar::a_method';
+
+    # or also:
+    mock('Foo::Bar::a_method');
 
 =head2 method
 
