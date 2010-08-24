@@ -27,4 +27,3 @@ directory (previously named C<t::lib::EasyMocker>). A couple of developers asked
 me if I could released this module as a real Test:: distribution on CPAN, so
 here it is.
 
-
