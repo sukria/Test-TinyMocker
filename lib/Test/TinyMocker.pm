@@ -7,7 +7,7 @@ use Carp qw{ croak };
 
 use vars qw(@EXPORT);
 use base 'Exporter';
-our $VERSION = '0.02';
+use version; our $VERSION = qv( '0.03' );
 
 my $rh_is_mocked = {};
 
@@ -17,47 +17,65 @@ sub method($) {@_}
 sub should(&) {@_}
 
 sub mock {
-    {
-        no strict 'refs';
-        no warnings 'redefine', 'prototype';
-        if (@_ == 3) {
-            my ($class, $method, $sub) = @_;
-            my $symbol = "${class}::${method}";
-            _save_sub($symbol);
 
-            *{$symbol} = $sub;
-        }
-        else {
-            my ($method, $sub) = @_;
-            _save_sub($method);
+	croak 'useless use of mock with one or less parameter'
+		if scalar @_ < 2;
 
-            *{$method} = $sub;
-        }
-    }
+	my $symbol = @_ > 2 ? qq{$_[0]::$_[1]} :  $_[0];
+	my $sub = $_[-1]; # last element of paramter is new sub
+
+	croak "unknown symbol : $symbol"
+		unless _symbol_exists( $symbol );
+	_save_sub( $symbol );
+	_bind_coderef_to_symbol( $symbol, $sub);
 }
 
 sub unmock {
-    my $symbole = @_ == 2 ? qq{$_[0]::$_[1]} : shift @_;
 
-    croak "unkown method $symbole"
-      unless $rh_is_mocked->{$symbole};
+	croak 'useless use of unmock without parameters'
+		unless scalar @_;
 
+	my $symbole = @_ == 2 ? qq{$_[0]::$_[1]} : $_[0];
+
+	croak "unkown method $symbole"
+		unless $rh_is_mocked->{$symbole};
+
+	{
+        no strict 'refs';
+        no warnings 'redefine', 'prototype';
+		*{$symbole} = delete $rh_is_mocked->{$symbole};
+	}
+}
+
+sub _symbol_exists {
+	my ($symbol) = @_;
     {
         no strict 'refs';
         no warnings 'redefine', 'prototype';
-        *{$symbole} = delete $rh_is_mocked->{$symbole};
+
+		return defined *{$symbol}{CODE};
+    }
+}
+
+sub _bind_coderef_to_symbol {
+	my ($symbol, $sub) = @_;
+    {
+        no strict 'refs';
+        no warnings 'redefine', 'prototype';
+
+        *{$symbol} = $sub;
     }
 }
 
 sub _save_sub {
-    my ($name) = @_;
-
-    {
+	my ($name) = @_;
+	
+	{
         no strict 'refs';
-        $rh_is_mocked->{$name} ||= *{$name}{CODE};
-    }
+		$rh_is_mocked->{$name} ||= *{$name}{CODE};
+	}
 
-    return $name;
+	return $name;
 }
 
 1;
