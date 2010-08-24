@@ -1,6 +1,7 @@
 .last_cover_stats
 .perlcriticrc
 .perltidyrc
+AUTHORS
 Changes
 ignore.txt
 lib/Test/TinyMocker.pm
@@ -9,6 +10,9 @@ MANIFEST
 README
 t/00-load.t
 t/01_mock.t
+t/02_unmock.t
+t/03_mock_error.t
+t/04_unmock_error.t
 t/manifest.t
 t/pod-coverage.t
 t/pod.t
