@@ -1,5 +1,11 @@
 Revision history for Test-TinyMocker
 
-0.01    Date/time
-        First version, released on an unsuspecting world.
+0.02	08/24/2010
+		[Jérôme Bourgeois]
+		* Support for the 'unmock' function.
+		* Make sure it's not possible to mock an unknown mehtod.
+
+0.01    08/22/2010
+		[Alexis Sukrieh]
+        * First version, provide the 'mock' function.
 
