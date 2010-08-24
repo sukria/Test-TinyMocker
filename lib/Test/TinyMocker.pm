@@ -5,10 +5,10 @@ use warnings;
 
 use Carp qw{ croak };
 
-use vars qw(@EXPORT);
+use vars qw(@EXPORT $VERSION);
 use base 'Exporter';
-use version; our $VERSION = qv('0.02');
 
+$VERSION = '0.02';
 my $mocks = {};
 
 @EXPORT = qw(mock unmock should method);
