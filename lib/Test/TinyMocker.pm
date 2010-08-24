@@ -7,7 +7,7 @@ use Carp qw{ croak };
 
 use vars qw(@EXPORT);
 use base 'Exporter';
-use version; our $VERSION = qv( '0.03' );
+use version; our $VERSION = qv('0.03');
 
 my $rh_is_mocked = {};
 
@@ -18,47 +18,47 @@ sub should(&) {@_}
 
 sub mock {
 
-	croak 'useless use of mock with one or less parameter'
-		if scalar @_ < 2;
+    croak 'useless use of mock with one or less parameter'
+      if scalar @_ < 2;
 
-	my $symbol = @_ > 2 ? qq{$_[0]::$_[1]} :  $_[0];
-	my $sub = $_[-1]; # last element of paramter is new sub
+    my $symbol = @_ > 2 ? qq{$_[0]::$_[1]} : $_[0];
+    my $sub = $_[-1];    # last element of paramter is new sub
 
-	croak "unknown symbol : $symbol"
-		unless _symbol_exists( $symbol );
-	_save_sub( $symbol );
-	_bind_coderef_to_symbol( $symbol, $sub);
+    croak "unknown symbol : $symbol"
+      unless _symbol_exists($symbol);
+    _save_sub($symbol);
+    _bind_coderef_to_symbol($symbol, $sub);
 }
 
 sub unmock {
 
-	croak 'useless use of unmock without parameters'
-		unless scalar @_;
+    croak 'useless use of unmock without parameters'
+      unless scalar @_;
 
-	my $symbole = @_ == 2 ? qq{$_[0]::$_[1]} : $_[0];
+    my $symbole = @_ == 2 ? qq{$_[0]::$_[1]} : $_[0];
 
-	croak "unkown method $symbole"
-		unless $rh_is_mocked->{$symbole};
+    croak "unkown method $symbole"
+      unless $rh_is_mocked->{$symbole};
 
-	{
+    {
         no strict 'refs';
         no warnings 'redefine', 'prototype';
-		*{$symbole} = delete $rh_is_mocked->{$symbole};
-	}
+        *{$symbole} = delete $rh_is_mocked->{$symbole};
+    }
 }
 
 sub _symbol_exists {
-	my ($symbol) = @_;
+    my ($symbol) = @_;
     {
         no strict 'refs';
         no warnings 'redefine', 'prototype';
 
-		return defined *{$symbol}{CODE};
+        return defined *{$symbol}{CODE};
     }
 }
 
 sub _bind_coderef_to_symbol {
-	my ($symbol, $sub) = @_;
+    my ($symbol, $sub) = @_;
     {
         no strict 'refs';
         no warnings 'redefine', 'prototype';
@@ -68,14 +68,14 @@ sub _bind_coderef_to_symbol {
 }
 
 sub _save_sub {
-	my ($name) = @_;
-	
-	{
-        no strict 'refs';
-		$rh_is_mocked->{$name} ||= *{$name}{CODE};
-	}
+    my ($name) = @_;
 
-	return $name;
+    {
+        no strict 'refs';
+        $rh_is_mocked->{$name} ||= *{$name}{CODE};
+    }
+
+    return $name;
 }
 
 1;
