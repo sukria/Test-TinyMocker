@@ -1,5 +1,9 @@
 Revision history for Test-TinyMocker
 
+0.03
+        [Sawyer X]
+        * Supporting arrayrefs for multiple methods, adding "methods".
+
 0.02	08/24/2010
 		[Jérôme Bourgeois]
 		* Support for the 'unmock' function.
