@@ -48,15 +48,26 @@ sub unmock {
     croak 'useless use of unmock without parameters'
       unless scalar @_;
 
-    my $symbol = @_ == 2 ? qq{$_[0]::$_[1]} : $_[0];
+    my @symbols = ();
+    if ( @_ == 2 ) {
+        @symbols = ref $_[1] eq 'ARRAY'             ?
+                   map { qq{$_[0]::$_} } @{ $_[1] } :
+                   qq{$_[0]::$_[1]};
+    } else {
+        @symbols = ref $_[0] eq 'ARRAY' ?
+                   @{ $_[0] }           :
+                   $_[0];
+    }
 
-    croak "unkown method $symbol"
-      unless $mocks->{$symbol};
+    foreach my $symbol (@symbols) {
+        croak "unkown method $symbol"
+          unless $mocks->{$symbol};
 
-    {
-        no strict 'refs';
-        no warnings 'redefine', 'prototype';
-        *{$symbol} = delete $mocks->{$symbol};
+        {
+            no strict 'refs';
+            no warnings 'redefine', 'prototype';
+            *{$symbol} = delete $mocks->{$symbol};
+        }
     }
 }
 
