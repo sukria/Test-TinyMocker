@@ -36,7 +36,7 @@ sub mock {
     my $sub = $_[-1];
 
     foreach my $symbol (@symbols) {
-        croak "unknown symbol : $symbol"
+        croak "unknown symbol: $symbol"
           unless _symbol_exists($symbol);
 
         _save_sub($symbol);
