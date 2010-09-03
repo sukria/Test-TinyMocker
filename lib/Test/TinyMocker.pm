@@ -21,7 +21,7 @@ sub mock {
     croak 'useless use of mock with one or less parameter'
       if scalar @_ < 2;
 
-    my @symbols;
+    my @symbols = ();
 
     if ( @_ > 2 ) {
         @symbols = ref $_[1] eq 'ARRAY'             ?
