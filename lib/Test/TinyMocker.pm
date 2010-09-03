@@ -45,19 +45,18 @@ sub mock {
 }
 
 sub unmock {
-
     croak 'useless use of unmock without parameters'
       unless scalar @_;
 
-    my $symbole = @_ == 2 ? qq{$_[0]::$_[1]} : $_[0];
+    my $symbol = @_ == 2 ? qq{$_[0]::$_[1]} : $_[0];
 
-    croak "unkown method $symbole"
-      unless $mocks->{$symbole};
+    croak "unkown method $symbol"
+      unless $mocks->{$symbol};
 
     {
         no strict 'refs';
         no warnings 'redefine', 'prototype';
-        *{$symbole} = delete $mocks->{$symbole};
+        *{$symbol} = delete $mocks->{$symbol};
     }
 }
 
