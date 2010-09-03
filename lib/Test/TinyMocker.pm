@@ -11,23 +11,37 @@ use base 'Exporter';
 $VERSION = '0.02';
 my $mocks = {};
 
-@EXPORT = qw(mock unmock should method);
+@EXPORT = qw(mock unmock should method methods);
 
-sub method($) {@_}
-sub should(&) {@_}
+sub method($)  {@_}
+sub methods($) {@_}
+sub should(&)  {@_}
 
 sub mock {
     croak 'useless use of mock with one or less parameter'
       if scalar @_ < 2;
 
-    my $symbol = @_ > 2 ? qq{$_[0]::$_[1]} : $_[0];
+    my @symbols;
+
+    if ( @_ > 2 ) {
+        @symbols = ref $_[1] eq 'ARRAY'             ?
+                   map { qq{$_[0]::$_} } @{ $_[1] } :
+                   qq{$_[0]::$_[1]};
+    } else {
+        @symbols = ref $_[0] eq 'ARRAY' ?
+                   @{ $_[0] }           :
+                   $_[0];
+    }
+
     my $sub = $_[-1];
 
-    croak "unknown symbol : $symbol"
-      unless _symbol_exists($symbol);
+    foreach my $symbol (@symbols) {
+        croak "unknown symbol : $symbol"
+          unless _symbol_exists($symbol);
 
-    _save_sub($symbol);
-    _bind_coderef_to_symbol($symbol, $sub);
+        _save_sub($symbol);
+        _bind_coderef_to_symbol($symbol, $sub);
+    }
 }
 
 sub unmock {
