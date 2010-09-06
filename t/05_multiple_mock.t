@@ -57,9 +57,9 @@ eval { mock ['Foo','Bar'] };
 like( $@, qr{useless use of mock with one}, "no call of mock with one parameter" );
 
 eval { mock 'Foo::Bar' => method 'faked' => should { return } };
-like( $@, qr{unknown symbol :}, "no mock non exists function" );
+like( $@, qr{unknown symbol:}, "no mock non exists function" );
 
 eval { mock 'Foo::Bar' => methods [ 'faked', 'baked' ] => should { return } };
-like( $@, qr{unknown symbol :}, "no mock non exists function" );
+like( $@, qr{unknown symbol:}, "no mock non exists function" );
 
 done_testing;
