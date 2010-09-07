@@ -11,39 +11,63 @@ use base 'Exporter';
 $VERSION = '0.02';
 my $mocks = {};
 
-@EXPORT = qw(mock unmock should method);
+@EXPORT = qw(mock unmock should method methods);
 
-sub method($) {@_}
-sub should(&) {@_}
+sub method($)  {@_}
+sub methods($) {@_}
+sub should(&)  {@_}
 
 sub mock {
     croak 'useless use of mock with one or less parameter'
       if scalar @_ < 2;
 
-    my $symbol = @_ > 2 ? qq{$_[0]::$_[1]} : $_[0];
+    my @symbols = ();
+
+    if ( @_ > 2 ) {
+        @symbols = ref $_[1] eq 'ARRAY'             ?
+                   map { qq{$_[0]::$_} } @{ $_[1] } :
+                   qq{$_[0]::$_[1]};
+    } else {
+        @symbols = ref $_[0] eq 'ARRAY' ?
+                   @{ $_[0] }           :
+                   $_[0];
+    }
+
     my $sub = $_[-1];
 
-    croak "unknown symbol : $symbol"
-      unless _symbol_exists($symbol);
+    foreach my $symbol (@symbols) {
+        croak "unknown symbol: $symbol"
+          unless _symbol_exists($symbol);
 
-    _save_sub($symbol);
-    _bind_coderef_to_symbol($symbol, $sub);
+        _save_sub($symbol);
+        _bind_coderef_to_symbol($symbol, $sub);
+    }
 }
 
 sub unmock {
-
     croak 'useless use of unmock without parameters'
       unless scalar @_;
 
-    my $symbole = @_ == 2 ? qq{$_[0]::$_[1]} : $_[0];
+    my @symbols = ();
+    if ( @_ == 2 ) {
+        @symbols = ref $_[1] eq 'ARRAY'             ?
+                   map { qq{$_[0]::$_} } @{ $_[1] } :
+                   qq{$_[0]::$_[1]};
+    } else {
+        @symbols = ref $_[0] eq 'ARRAY' ?
+                   @{ $_[0] }           :
+                   $_[0];
+    }
 
-    croak "unkown method $symbole"
-      unless $mocks->{$symbole};
+    foreach my $symbol (@symbols) {
+        croak "unkown method $symbol"
+          unless $mocks->{$symbol};
 
-    {
-        no strict 'refs';
-        no warnings 'redefine', 'prototype';
-        *{$symbole} = delete $mocks->{$symbole};
+        {
+            no strict 'refs';
+            no warnings 'redefine', 'prototype';
+            *{$symbol} = delete $mocks->{$symbol};
+        }
     }
 }
 
@@ -100,6 +124,14 @@ Version 0.02
             return $mocked_value;
         };
 
+    # or
+
+    mock 'Some::Module'
+        => methods [ 'this_method', 'that_method' ]
+        => should {
+            return $mocked_value;
+        };
+
     # or 
 
     mock 'Some::Module::some_method'
@@ -116,11 +148,14 @@ Version 0.02
 	# or
 	
 	unmock 'Some::Module' => method 'some_method';
-	
+
+    # or
+
+    unmock 'Some::Module' => methods [ 'this_method', 'that_method' ];
 
 =head1 EXPORT
 
-=head2 mock($module, $method, $sub)
+=head2 mock($module, $method_or_methods, $sub)
 
 This function allows you to overwrite the given method with an arbitrary code
 block. This lets you simulate soem kind of behaviour for your tests.
@@ -129,8 +164,8 @@ Alternatively, this method can be passed only two arguments, the first one will
 be the full path of the method (pcakge name + method name) and the second one
 the coderef.
 
-Syntactic sugar is provided (C<method> and C<should>) in order to let you write
-sweet mock statements:
+Syntactic sugar is provided (C<method>, C<methods> and C<should>) in order to
+let you write sweet mock statements:
 
     # This:
     mock('Foo::Bar', 'a_method', sub { return 42;});
@@ -144,10 +179,18 @@ sweet mock statements:
     # or also:
     mock('Foo::Bar::a_method', sub { return 42;});
 
-=head2 unmock($module, $method)
+Using multiple methods at the same time can be done with arrayrefs:
 
-Syntactic sugar is provided (C<method>) in order to let you write sweet unmock
-statements:
+    # This:
+    mock('Foo::Bar', ['a_method', 'b_method'], sub { 42 } );
+
+    # is the same as:
+    mock 'Foo::Bar' => methods ['a_method', 'b_method'] => should { 42 };
+
+=head2 unmock($module, $method_or_methods)
+
+Syntactic sugar is provided (C<method> and C<methods>) in order to let you write
+sweet unmock statements:
 
     # This:
     unmock('Foo::Bar', 'a_method');
@@ -155,7 +198,15 @@ statements:
     # is the same as:
     unmock 'Foo::Bar' => method 'a_method';
 
+And using multiple methods at the same time:
+
+    unmock 'Foo::Bar' => methods ['a_method', 'b_method'];
+
 =head2 method
+
+Syntactic sugar for mock()
+
+=head2 methods
 
 Syntactic sugar for mock()
 
