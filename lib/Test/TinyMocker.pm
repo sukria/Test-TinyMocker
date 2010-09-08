@@ -21,19 +21,8 @@ sub mock {
     croak 'useless use of mock with one or less parameter'
       if scalar @_ < 2;
 
-    my @symbols = ();
-
-    if ( @_ > 2 ) {
-        @symbols = ref $_[1] eq 'ARRAY'             ?
-                   map { qq{$_[0]::$_} } @{ $_[1] } :
-                   qq{$_[0]::$_[1]};
-    } else {
-        @symbols = ref $_[0] eq 'ARRAY' ?
-                   @{ $_[0] }           :
-                   $_[0];
-    }
-
-    my $sub = $_[-1];
+    my $sub     = pop;
+    my @symbols = _flat_symbols(@_);
 
     foreach my $symbol (@symbols) {
         croak "unknown symbol: $symbol"
@@ -48,17 +37,7 @@ sub unmock {
     croak 'useless use of unmock without parameters'
       unless scalar @_;
 
-    my @symbols = ();
-    if ( @_ == 2 ) {
-        @symbols = ref $_[1] eq 'ARRAY'             ?
-                   map { qq{$_[0]::$_} } @{ $_[1] } :
-                   qq{$_[0]::$_[1]};
-    } else {
-        @symbols = ref $_[0] eq 'ARRAY' ?
-                   @{ $_[0] }           :
-                   $_[0];
-    }
-
+    my @symbols = _flat_symbols(@_);
     foreach my $symbol (@symbols) {
         croak "unkown method $symbol"
           unless $mocks->{$symbol};
@@ -68,6 +47,18 @@ sub unmock {
             no warnings 'redefine', 'prototype';
             *{$symbol} = delete $mocks->{$symbol};
         }
+    }
+}
+
+sub _flat_symbols {
+    if ( @_ == 2 ) {
+        return ref $_[1] eq 'ARRAY'             ?
+               map { qq{$_[0]::$_} } @{ $_[1] } :
+               qq{$_[0]::$_[1]};
+    } else {
+        return ref $_[0] eq 'ARRAY' ?
+               @{ $_[0] }           :
+               $_[0];
     }
 }
 
