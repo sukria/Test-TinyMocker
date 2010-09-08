@@ -51,14 +51,15 @@ sub unmock {
 }
 
 sub _flat_symbols {
-    if ( @_ == 2 ) {
-        return ref $_[1] eq 'ARRAY'             ?
-               map { qq{$_[0]::$_} } @{ $_[1] } :
-               qq{$_[0]::$_[1]};
-    } else {
-        return ref $_[0] eq 'ARRAY' ?
-               @{ $_[0] }           :
-               $_[0];
+    if (@_ == 2) {
+        return ref $_[1] eq 'ARRAY'
+          ? map {qq{$_[0]::$_}} @{$_[1]}
+          : qq{$_[0]::$_[1]};
+    }
+    else {
+        return ref $_[0] eq 'ARRAY'
+          ? @{$_[0]}
+          : $_[0];
     }
 }
 
@@ -99,10 +100,6 @@ __END__
 =head1 NAME
 
 Test::TinyMocker - a very simple tool to mock external modules
-
-=head1 VERSION
-
-Version 0.02
 
 =head1 SYNOPSIS
 
