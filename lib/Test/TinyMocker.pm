@@ -8,7 +8,7 @@ use Carp qw{ croak };
 use vars qw(@EXPORT $VERSION);
 use base 'Exporter';
 
-$VERSION = '0.02';
+$VERSION = '0.03';
 my $mocks = {};
 
 @EXPORT = qw(mock unmock should method methods);
