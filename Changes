@@ -3,6 +3,7 @@ Revision history for Test-TinyMocker
 0.03
         [Sawyer X]
         * Supporting arrayrefs for multiple methods, adding "methods".
+        * Refactoring symbol flattening.
 
 0.02	08/24/2010
 		[Jérôme Bourgeois]
