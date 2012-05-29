@@ -133,7 +133,7 @@ Test::TinyMocker - a very simple tool to mock external modules
 	
 	unmock 'Some::Module::some_method';
 
-	# or
+    # or
 	
 	unmock 'Some::Module' => method 'some_method';
 
