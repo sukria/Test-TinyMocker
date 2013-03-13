@@ -8,11 +8,12 @@ use Carp qw{ croak };
 use vars qw(@EXPORT $VERSION);
 use base 'Exporter';
 
-$VERSION = '0.03';
+$VERSION = '0.05';
 my $mocks = {};
 
-@EXPORT = qw(mock unmock should method methods);
+@EXPORT = qw(mock unmock should method methods mocked);
 
+sub mocked($$) {$mocks->{join("::", @_)}}
 sub method($)  {@_}
 sub methods($) {@_}
 sub should(&)  {@_}
@@ -189,6 +190,10 @@ sweet unmock statements:
 And using multiple methods at the same time:
 
     unmock 'Foo::Bar' => methods ['a_method', 'b_method'];
+
+=head2 mocked($module, $method)
+
+Return CODE of mocked method
 
 =head2 method
 
