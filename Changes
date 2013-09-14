@@ -1,5 +1,6 @@
 {{$NEXT}}
-    *
+    *   Removed a spurious Unicode space which caused failures in t/pod.t.
+        (chromatic)
 
 0.03
         [Sawyer X]
