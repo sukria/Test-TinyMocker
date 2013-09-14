@@ -58,3 +58,5 @@ equivalent_modules = strictures Moo Moo::Role
 [InputOutput::ProhibitBacktickOperators]
 only_in_void_context = 1
 [-Variables::ProhibitAugmentedAssignmentInDeclaration]
+
+[-Subroutines::ProhibitSubroutinePrototypes]
