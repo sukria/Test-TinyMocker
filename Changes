@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.04      2013-09-14 11:17:48 Europe/Paris
     *   Removed a spurious Unicode space which caused failures in t/pod.t.
         (chromatic)
 
