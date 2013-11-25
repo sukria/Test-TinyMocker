@@ -11,10 +11,11 @@ use base 'Exporter';
 $VERSION = '0.03';
 my $mocks = {};
 
-@EXPORT = qw(mock unmock should method methods);
+@EXPORT = qw(mock unmock should method methods create);
 
 sub method($)  {@_}
 sub methods($) {@_}
+sub create($) {@_}
 sub should(&)  {@_}
 
 sub mock {
@@ -22,11 +23,17 @@ sub mock {
       if scalar @_ < 2;
 
     my $sub     = pop;
+    my $mock_unknown = 0;
+    push @_, my $val = pop @_;
+    if (@_ >= 2 && $val eq '1') {
+        $mock_unknown = 1;
+        pop @_;
+    }
     my @symbols = _flat_symbols(@_);
 
     foreach my $symbol (@symbols) {
         croak "unknown symbol: $symbol"
-          unless _symbol_exists($symbol);
+          unless $mock_unknown || _symbol_exists($symbol);
 
         _save_sub($symbol);
         _bind_coderef_to_symbol($symbol, $sub);
