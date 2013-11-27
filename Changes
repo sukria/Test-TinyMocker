@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+    * Support for mocking of unknown symbols (Damiano Turrisi, Alexis Sukrieh).
+
 0.04      2013-09-14 11:17:48 Europe/Paris
     *   Removed a spurious Unicode space which caused failures in t/pod.t.
         (chromatic)
