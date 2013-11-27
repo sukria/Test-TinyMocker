@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.05      2013-11-27 15:06:40 Europe/Paris
+
     * Support for mocking of unknown symbols (Damiano Turrisi, Alexis Sukrieh).
 
 0.04      2013-09-14 11:17:48 Europe/Paris
