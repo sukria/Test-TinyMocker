@@ -21,12 +21,22 @@ sub mock {
     croak 'useless use of mock with one or less parameter'
       if scalar @_ < 2;
 
-    my $sub     = pop;
+    # if the last element is a HashRef, it's options to process
+    my $options = {};
+    my $last_elem = $_[-1];
+    if (ref($last_elem) eq ref({})) {
+        $options = pop @_;
+    }
+
+    # the last element is now the subroutine to use for the mock
+    my $sub = pop;
+
     my @symbols = _flat_symbols(@_);
+    my $ignore_unknown = $options->{ignore_unknown} || 0;
 
     foreach my $symbol (@symbols) {
         croak "unknown symbol: $symbol"
-          unless _symbol_exists($symbol);
+          if !$ignore_unknown && !_symbol_exists($symbol);
 
         _save_sub($symbol);
         _bind_coderef_to_symbol($symbol, $sub);
@@ -143,7 +153,7 @@ Test::TinyMocker - a very simple tool to mock external modules
 
 =head1 EXPORT
 
-=head2 mock($module, $method_or_methods, $sub)
+=head2 mock($module, $method_or_methods, $sub, $options)
 
 This function allows you to overwrite the given method with an arbitrary code
 block. This lets you simulate soem kind of behaviour for your tests.
@@ -151,6 +161,10 @@ block. This lets you simulate soem kind of behaviour for your tests.
 Alternatively, this method can be passed only two arguments, the first one will
 be the full path of the method (pcakge name + method name) and the second one
 the coderef.
+
+An options HashRef can be passed as the last argument. Currently one option is
+supported: C<ignore_unknown> (default false) which when sets to true allows to
+mock an unknown symbol.
 
 Syntactic sugar is provided (C<method>, C<methods> and C<should>) in order to
 let you write sweet mock statements:
