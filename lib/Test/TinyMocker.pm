@@ -33,12 +33,24 @@ sub mock {
 
     my @symbols = _flat_symbols(@_);
     my $ignore_unknown = $options->{ignore_unknown} || 0;
+    my $is_decorator = $options->{is_decorator} || 0;
+    my $decorated = $sub; # save it for later
 
     foreach my $symbol (@symbols) {
         croak "unknown symbol: $symbol"
           if !$ignore_unknown && !_symbol_exists($symbol);
 
         _save_sub($symbol);
+
+        if ($is_decorator) {
+            # if we're in decorator mode, pass the original method as
+            # the first argument.
+            $sub = sub {
+                unshift @_, $mocks->{$symbol};
+                goto &$decorated;
+            };
+        }
+
         _bind_coderef_to_symbol($symbol, $sub);
     }
 }
@@ -151,6 +163,14 @@ Test::TinyMocker - a very simple tool to mock external modules
 
     unmock 'Some::Module' => methods [ 'this_method', 'that_method' ];
 
+    # if you need access to the original sub, set is_decorator
+
+    mock('Some::Module', 'some_method',
+         sub { my $orig = shift;
+               push @_, 'decorate!';
+               goto &$orig; },
+         { is_decorator => 1 });
+
 =head1 EXPORT
 
 =head2 mock($module, $method_or_methods, $sub, $options)
@@ -162,9 +182,21 @@ Alternatively, this method can be passed only two arguments, the first one will
 be the full path of the method (pcakge name + method name) and the second one
 the coderef.
 
-An options HashRef can be passed as the last argument. Currently one option is
-supported: C<ignore_unknown> (default false) which when sets to true allows to
-mock an unknown symbol.
+An options HashRef can be passed as the last argument. Currently the
+following options are supported:
+
+=over 4
+
+=item C<ignore_unknown> (default false)
+
+which when set to true allows to mock an unknown symbol
+
+=item C<is_decorator> (default false)
+
+which when set adds the old coderef in front of the mocked coderef's
+list of arguments
+
+=back
 
 Syntactic sugar is provided (C<method>, C<methods> and C<should>) in order to
 let you write sweet mock statements:
