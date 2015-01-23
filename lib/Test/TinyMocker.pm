@@ -10,8 +10,9 @@ use base 'Exporter';
 
 $VERSION = '0.03';
 my $mocks = {};
+my $mocked = {};
 
-@EXPORT = qw(mock unmock should method methods);
+@EXPORT = qw(mock unmock should method methods tmp_unmock remock);
 
 sub method($)  {@_}
 sub methods($) {@_}
@@ -44,7 +45,17 @@ sub mock {
 }
 
 sub unmock {
-    croak 'useless use of unmock without parameters'
+    tmp_unmock(@_);
+
+    my @symbols = _flat_symbols(@_);
+    foreach my $symbol (@symbols) {
+        delete $mocks->{$symbol};
+        delete $mocked->{$symbol};
+    }
+}
+
+sub tmp_unmock {
+  croak 'useless use of unmock without parameters'
       unless scalar @_;
 
     my @symbols = _flat_symbols(@_);
@@ -55,8 +66,24 @@ sub unmock {
         {
             no strict 'refs';
             no warnings 'redefine', 'prototype';
-            *{$symbol} = delete $mocks->{$symbol};
+            *{$symbol} = $mocks->{$symbol};
         }
+    }
+}
+
+sub remock {
+  croak 'useless use of remock without parameters'
+      unless scalar @_;
+    my @symbols = _flat_symbols(@_);
+    foreach my $symbol (@symbols) {
+        croak "unkown method $symbol"
+          unless $mocks->{$symbol};
+
+          {
+            no strict 'refs';
+            no warnings 'redefine', 'prototype';
+            *{$symbol} = $mocked->{$symbol};
+          }
     }
 }
 
@@ -90,6 +117,7 @@ sub _bind_coderef_to_symbol {
         no warnings 'redefine', 'prototype';
 
         *{$symbol} = $sub;
+        $mocked->{$symbol} ||= $sub;
     }
 }
 
@@ -130,7 +158,7 @@ Test::TinyMocker - a very simple tool to mock external modules
             return $mocked_value;
         };
 
-    # or 
+    # or
 
     mock 'Some::Module::some_method'
         => should {
@@ -140,11 +168,11 @@ Test::TinyMocker - a very simple tool to mock external modules
     # Some::Module::some_method() will now always return $mocked_value;
 
 	# To restore the original method
-	
+
 	unmock 'Some::Module::some_method';
 
     # or
-	
+
 	unmock 'Some::Module' => method 'some_method';
 
     # or
@@ -215,6 +243,14 @@ Syntactic sugar for mock()
 =head2 should
 
 Syntactic sugar for mock()
+
+=head2 tmp_unmock
+
+Temporarly unmock a sub.
+
+=head2 remock
+
+Mock back a method with the same sub as previously mocked and temporarly unmocked.
 
 =head1 AUTHOR
 
