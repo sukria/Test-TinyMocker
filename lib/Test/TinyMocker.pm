@@ -107,6 +107,8 @@ sub _save_sub {
 1;
 __END__
 
+=pod
+
 =head1 NAME
 
 Test::TinyMocker - a very simple tool to mock external modules
@@ -226,13 +228,11 @@ Please report any bugs or feature requests to C<bug-test-tinymocker at rt.cpan.o
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Test-TinyMocker>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
 
-
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
 
     perldoc Test::TinyMocker
-
 
 You can also look for information at:
 
@@ -255,7 +255,6 @@ L<http://cpanratings.perl.org/d/Test-TinyMocker>
 L<http://search.cpan.org/dist/Test-TinyMocker/>
 
 =back
-
 
 =head1 ACKNOWLEDGEMENTS
 
